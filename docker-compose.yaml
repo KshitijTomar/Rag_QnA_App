@@ -1,10 +1,13 @@
 version: "3.8"
 services:
   backend:
-    build: .
-    command: python backend/app.py
+    build: ./backend
+    container_name: backend
+    command: python -u app.py
     ports:
       - "5000:5000"
+    env_file:
+      - .env_docker
     depends_on:
       - mongo
       - minio
@@ -12,8 +15,11 @@ services:
       - rabbitmq
 
   worker:
-    build: .
-    command: python backend/worker.py
+    build: ./backend
+    container_name: worker
+    command: python -u worker.py
+    env_file:
+      - .env_docker
     depends_on:
       - mongo
       - minio
@@ -22,7 +28,7 @@ services:
       
   mongo:
     image: mongo
-    container_name: mongo_db
+    container_name: mongo
     ports:
       - "27017:27017"
     volumes:
@@ -30,7 +36,7 @@ services:
 
   minio:
     image: minio/minio
-    container_name: minio_server
+    container_name: minio
     command: server /data --console-address ":9001"
     ports:
       - "9000:9000"
@@ -43,7 +49,7 @@ services:
 
   pgvector:
     image: ankane/pgvector
-    container_name: pgvector_db
+    container_name: pgvector
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
@@ -52,10 +58,11 @@ services:
       - "5432:5432"
     volumes:
       - .data/pgvector_data:/var/lib/postgresql/data
+      - ./init_pgvector.sql:/docker-entrypoint-initdb.d/init_pgvector.sql
 
   rabbitmq:
-    image: rabbitmq
-    container_name: rabbitmq_server
+    image: rabbitmq:3.8-management-alpine
+    container_name: rabbitmq
     ports:
       - "5672:5672"
       - "15672:15672"
