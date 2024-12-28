@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+sqlalchemy
+# asyncpg
+transformers
+# torch
+# psycopg2
+
+datasets
+pandas
+# openai
+pymongo 
+
+# sklearn.utils

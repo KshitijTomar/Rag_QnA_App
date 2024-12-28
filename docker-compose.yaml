@@ -1,0 +1,63 @@
+version: "3.8"
+services:
+  backend:
+    build: .
+    command: python backend/app.py
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongo
+      - minio
+      - pgvector
+      - rabbitmq
+
+  worker:
+    build: .
+    command: python backend/worker.py
+    depends_on:
+      - mongo
+      - minio
+      - pgvector
+      - rabbitmq
+      
+  mongo:
+    image: mongo
+    container_name: mongo_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - .data/mongo_data:/data/db 
+
+  minio:
+    image: minio/minio
+    container_name: minio_server
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ACCESS_KEY: minio
+      MINIO_SECRET_KEY: minio123
+    volumes:
+      - .data/minio_data:/data
+
+  pgvector:
+    image: ankane/pgvector
+    container_name: pgvector_db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: py-rag
+    ports:
+      - "5432:5432"
+    volumes:
+      - .data/pgvector_data:/var/lib/postgresql/data
+
+  rabbitmq:
+    image: rabbitmq
+    container_name: rabbitmq_server
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - .data/rabbitmq_data:/var/lib/rabbitmq 

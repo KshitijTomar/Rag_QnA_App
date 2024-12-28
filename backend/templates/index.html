@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG Model File Upload and Search</title>
+</head>
+<body>
+    <h1>File Upload and Search</h1>
+
+    <!-- File Upload Section -->
+    <div>
+        <h3>Upload File</h3>
+        <input type="file" id="fileUpload">
+        <button onclick="uploadFile()">Upload</button>
+    </div>
+
+    <!-- File Status Section -->
+    <h3>Uploaded Files</h3>
+    <table id="fileStatusTable">
+        <thead>
+            <tr>
+                <th>File Name</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="fileStatusBody"></tbody>
+    </table>
+    <button onclick="refreshFileStatus()">Refresh</button>
+
+    <!-- Search Query Section -->
+    <h3>Search Query</h3>
+    <input type="text" id="searchQuery">
+    <button onclick="searchQuery()">Search</button>
+    
+    <!-- Query Response Section -->
+    <h3>Query Response</h3>
+    <textarea id="queryResponse" readonly></textarea>
+
+    <script>
+        async function uploadFile() {
+            const file = document.getElementById('fileUpload').files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            alert(result.message);
+            refreshFileStatus();
+        }
+
+        async function refreshFileStatus() {
+            const response = await fetch('/api/files');
+            const result = await response.json();
+            const tableBody = document.getElementById('fileStatusBody');
+            tableBody.innerHTML = '';
+            result.files.forEach(file => {
+                const row = `<tr><td>${file.file_name}</td><td>${file.status}</td></tr>`;
+                tableBody.innerHTML += row;
+            });
+        }
+
+        async function searchQuery() {
+            const query = document.getElementById('searchQuery').value;
+            const response = await fetch('/api/search', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query_msg: query })
+            });
+            const result = await response.json();
+            document.getElementById('queryResponse').value = result.response;
+        }
+    </script>
+</body>
+</html>

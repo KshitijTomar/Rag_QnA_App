@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG System</title>
+</head>
+<body>
+    <h1>RAG System - File Upload & Search</h1>
+    
+    <!-- File Upload Section -->
+    <div>
+        <h2>Upload File</h2>
+        <input type="file" id="fileInput">
+        <button onclick="uploadFile()">Upload</button>
+    </div>
+
+    <!-- List of Uploaded Files -->
+    <h3>Uploaded Files</h3>
+    <table id="fileList">
+        <thead>
+            <tr>
+                <th>File Name</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <button onclick="refreshFileList()">Refresh</button>
+
+    <!-- Search Section -->
+    <div>
+        <h2>Search</h2>
+        <input type="text" id="queryInput" placeholder="Enter your query">
+        <button onclick="searchQuery()">Search</button>
+    </div>
+
+    <!-- Query Response Section -->
+    <h3>Response</h3>
+    <div id="response_area"></div>
+    <textarea id="responseBox" rows="5" cols="50" readonly></textarea>
+
+    <script>
+        // File upload function
+        function uploadFile() {
+            let fileInput = document.getElementById("fileInput");
+            let formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            }).then(response => response.json())
+              .then(data => {
+                  if (data.success) {
+                      alert("File uploaded successfully");
+                      refreshFileList();
+                  } else {
+                      alert("File upload failed");
+                  }
+              });
+        }
+
+        // Refresh uploaded files list
+        function refreshFileList() {
+            fetch('/files')
+                .then(response => response.json())
+                .then(files => {
+                    let tableBody = document.getElementById('fileList').getElementsByTagName('tbody')[0];
+                    tableBody.innerHTML = '';
+                    files.forEach(file => {
+                        let row = tableBody.insertRow();
+                        row.insertCell(0).textContent = file.file_name;
+                        row.insertCell(1).textContent = file.status;
+                    });
+                });
+        }
+
+        // Search function
+        function searchQuery() {
+            let query = document.getElementById("queryInput").value;
+            fetch('/search', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ query_msg: query })
+            }).then(response => response.json())
+              .then(data => {
+                  document.getElementById("responseBox").value = data.response;
+              });
+        }
+
+        // Initialize file list on page load
+        window.onload = refreshFileList;
+    </script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+Flask
+pika
+pymongo
+psycopg2-binary
+minio
+sentence-transformers
+transformers
