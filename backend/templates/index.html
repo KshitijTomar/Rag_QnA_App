@@ -6,7 +6,7 @@
     <title>RAG Model File Upload and Search</title>
 </head>
 <body>
-    <h1>File Upload and Search</h1>
+    <h1>RAG Model File Upload and Search</h1>
 
     <!-- File Upload Section -->
     <div>
@@ -35,7 +35,11 @@
     
     <!-- Query Response Section -->
     <h3>Query Response</h3>
+    <h5>File name:</h5>
+    <input id="file_name" readonly></input>
+    <h5>Answer:</h5>
     <textarea id="queryResponse" readonly></textarea>
+    <pre id="json"></pre>
 
     <script>
         async function uploadFile() {
@@ -71,8 +75,12 @@
                 body: JSON.stringify({ query_msg: query })
             });
             const result = await response.json();
-            document.getElementById('queryResponse').value = result.response;
+            document.getElementById('queryResponse').value = result.answer;
+            document.getElementById('file_name').value = result.file_name;
+            document.getElementById('json').textContent  = JSON.stringify(result, undefined, 2);
+
         }
+        refreshFileStatus()
     </script>
 </body>
 </html>
