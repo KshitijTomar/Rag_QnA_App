@@ -8,3 +8,6 @@ sentence-transformers
 transformers
 PyMuPDF
 python-dotenv
+fastapi
+python-multipart
+uvicorn
