@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 from utils import get_answer_from_retrieved_documents, upload_file_to_mongo, getfiles
+import uvicorn
 
 app = FastAPI()
 
@@ -73,5 +74,4 @@ async def search_query(request: Request):
 
 # Start the FastAPI app
 if __name__ == "__main__":
-    import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

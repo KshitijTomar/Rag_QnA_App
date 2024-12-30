@@ -70,3 +70,4 @@ API should be able tohandle Mongo doc creation and fetch
 - https://dev.to/stephenc222/how-to-use-postgresql-to-store-and-query-vector-embeddings-h4b
 - https://github.com/pgvector/pgvector
 - https://www.youtube.com/watch?v=pIGRwMjhMaQ&ab_channel=MervinPraison
+- https://stackoverflow.com/questions/77205123/how-do-i-slim-down-sberts-sentencer-transformer-library

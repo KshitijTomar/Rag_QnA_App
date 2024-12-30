@@ -47,7 +47,7 @@
             const formData = new FormData();
             formData.append('file', file);
 
-            const response = await fetch('http://localhost:8000/api/upload', {
+            const response = await fetch('{{base_url}}/api/upload', {
                 method: 'POST',
                 body: formData
             });
@@ -57,7 +57,7 @@
         }
 
         async function refreshFileStatus() {
-            const response = await fetch('http://localhost:8000/api/files');
+            const response = await fetch('{{base_url}}/api/files');
             const result = await response.json();
             const tableBody = document.getElementById('fileStatusBody');
             tableBody.innerHTML = '';
@@ -69,7 +69,7 @@
 
         async function searchQuery() {
             const query = document.getElementById('searchQuery').value;
-            const response = await fetch('http://localhost:8000/api/search', {
+            const response = await fetch('{{base_url}}/api/search', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ query_msg: query })

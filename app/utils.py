@@ -1,4 +1,3 @@
-
 import os
 import pymongo
 import minio
@@ -132,7 +131,6 @@ class MongoDB:
         config = dotenv_values(".env")
         env_db=config.get("MONGO_DB")
         env_col=config.get("MONGO_COLLECTION")
-        print(env_db)
         self.conn = pymongo.MongoClient(config.get("MONGO_URL"))
         self.db = self.conn[env_db]
         self.col= self.db[env_col]

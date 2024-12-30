@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
+from dotenv import dotenv_values
 
 from utils import get_answer_from_retrieved_documents, upload_file_to_mongo, getfiles
 
@@ -9,7 +10,8 @@ CORS(app, origins=["http://localhost:5000", "http://localhost:8000", "http://127
     
 @app.route('/')
 def index():
-    return render_template('index.html')
+    config = dotenv_values(".env")
+    return render_template('index.html', base_url=config.get("API_URL","http://localhost:8000"))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')

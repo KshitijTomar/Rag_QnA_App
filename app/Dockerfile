@@ -1,5 +1,8 @@
-FROM python:3.11-slim
+FROM python:3.11.2-slim-bullseye
 WORKDIR /app
+RUN pip install --upgrade pip
+RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+RUN pip install sentence-transformers
 COPY requirements.txt ./requirements.txt
 RUN pip install -r requirements.txt
 COPY templates ./templates
