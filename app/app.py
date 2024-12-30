@@ -28,11 +28,8 @@ def upload_file():
     if file.filename == '':
         return jsonify({"message": "No selected file"}), 400
 
-    file_name = file.filename
-    file_extension = file_name.split('.')[-1]
-
     try:
-        upload_file_to_mongo(file, file_name, file_extension)
+        upload_file_to_mongo(file, file.filename)
         return jsonify({"message": "File uploaded successfully!"})
     except Exception as e:
         return jsonify({"message": f"Failed to upload file: {e.message}"}), 500

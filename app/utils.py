@@ -21,10 +21,10 @@ tokenizer = BartTokenizer.from_pretrained("facebook/bart-large-cnn")
 generator_model = BartForConditionalGeneration.from_pretrained("facebook/bart-large-cnn")
 
 
-def get_answer_from_retrieved_documents(query_msg):
+def get_answer_from_retrieved_documents(query_msg, file_selection=None):
     try:
         query_embedding = create_embeddings(query_msg)
-        search_results = semantic_search(query_embedding)
+        search_results = semantic_search(query_embedding, file_selection)
 
         final_results = process_search_results(search_results)
         if final_results:
@@ -97,7 +97,7 @@ def create_embeddings(text):
     return embeddings
 
 # Function to perform semantic search using cosine similarity
-def semantic_search(query_embedding):
+def semantic_search(query_embedding, file_selection=None):
     try:
         query_embedding_list = query_embedding.tolist()
 
@@ -105,11 +105,12 @@ def semantic_search(query_embedding):
         query_embedding_array = f'[{", ".join(map(str, query_embedding_list))}]'  
         
         # Perform a cosine similarity search using pgvector in Postgres
-        database.postgres_client.execute("""
-            SELECT mongo_doc_id, embedding, 1 - (embedding <=> %s::vector) AS cosine_similarity, file_name, content, chunk_info
-            FROM embeddings
-            ORDER BY cosine_similarity DESC LIMIT 10;
-        """, (query_embedding_array,))
+        query = "SELECT mongo_doc_id, embedding, 1 - (embedding <=> %s::vector) AS cosine_similarity, file_name, content, chunk_info FROM embeddings "
+        if file_selection: 
+            query += f"WHERE file_name='{file_selection}' "
+        query += "ORDER BY cosine_similarity DESC LIMIT 10;"
+
+        database.postgres_client.execute(query, (query_embedding_array,))
 
         results = database.postgres_client.cur.fetchall()
         return results
@@ -151,11 +152,11 @@ class MongoDB:
     def update_status(self, mongo_doc_id, status):
         self.col.update_one({"id": mongo_doc_id}, {"$set": {"status": status}})
 
-    def file_uploaded(self, file_name, file_extension):
+    def file_uploaded(self, file_name):
         mongo_doc = {
             "id": str(uuid.uuid4()),
             "file_name": file_name,
-            "file_extension": file_extension,
+            "file_extension": file_name.split('.')[-1],
             "created_at": datetime.datetime.utcnow(),
             "status": "uploaded"
         }
@@ -313,10 +314,10 @@ class Database:
 
 database = Database()
 
-def upload_file_to_mongo(file, file_name, file_extension):
+def upload_file_to_mongo(file, file_name):
     try:
         database.minio_client.upload_file(file_name, file)
-        mongo_doc = database.mongo_client.file_uploaded(file_name, file_extension)
+        mongo_doc = database.mongo_client.file_uploaded(file_name)
         database.rmq_client.send_msg_mongo_doc(mongo_doc_id = mongo_doc["id"], status = "uploaded")
     except S3Error as e:
         print("Error: Minio file upload issue")

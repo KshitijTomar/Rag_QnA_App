@@ -30,18 +30,39 @@
 
     <!-- Search Query Section -->
     <h3>Search Query</h3>
-    <input type="text" id="searchQuery">
+    <select id="file_selection"></select><br>
+    <input type="text" id="searchQuery" placeholder="Query"><br>
     <button onclick="searchQuery()">Search</button>
     
     <!-- Query Response Section -->
     <h3>Query Response</h3>
-    <h5>File name:</h5>
+    <h5>File used for result:</h5>
     <input id="file_name" readonly></input>
     <h5>Answer:</h5>
     <textarea id="queryResponse" readonly></textarea>
     <pre id="json"></pre>
 
     <script>
+        var _files_list=[]
+
+        function populate_selections(_files_list) {            
+            var select = document.getElementById("file_selection");
+            select.innerHTML = "";
+
+            var el = document.createElement("option");
+            el.textContent = "If you want a file specific answer, choose a file from dropdown";
+            el.value = "";
+            select.appendChild(el);
+            
+            for(var i = 0; i < _files_list.length; i++) {
+                var opt = _files_list[i];
+                var el = document.createElement("option");
+                el.textContent = opt;
+                el.value = opt;
+                select.appendChild(el);
+            }
+        }
+
         async function uploadFile() {
             const file = document.getElementById('fileUpload').files[0];
             const formData = new FormData();
@@ -57,6 +78,7 @@
         }
 
         async function refreshFileStatus() {
+            _files_list.splice(0, _files_list.length);
             const response = await fetch('{{base_url}}/api/files');
             const result = await response.json();
             const tableBody = document.getElementById('fileStatusBody');
@@ -64,15 +86,18 @@
             result.files.forEach(file => {
                 const row = `<tr><td>${file.file_name}</td><td>${file.status}</td></tr>`;
                 tableBody.innerHTML += row;
+                _files_list.push(file.file_name)
             });
+            populate_selections(_files_list)
         }
 
         async function searchQuery() {
             const query = document.getElementById('searchQuery').value;
+            const file_selection = document.getElementById('file_selection').value;
             const response = await fetch('{{base_url}}/api/search', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ query_msg: query })
+                body: JSON.stringify({ query_msg: query , file_selection: file_selection})
             });
             const result = await response.json();
             document.getElementById('queryResponse').value = result.answer;
