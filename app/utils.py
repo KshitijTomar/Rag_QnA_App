@@ -314,7 +314,7 @@ class Database:
 
 database = Database()
 
-def upload_file_to_mongo(file, file_name):
+def upload_file_to_minio_mongo_rmq(file, file_name):
     try:
         database.minio_client.upload_file(file_name, file)
         mongo_doc = database.mongo_client.file_uploaded(file_name)
